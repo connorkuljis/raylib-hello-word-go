@@ -1,10 +1,14 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	"math/rand/v2"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
 
 const (
-	height int32 = 450
-	width  int32 = 450
+	width  int32 = 1024
+	height int32 = 768
 	title        = "raylib example - basic window"
 )
 
@@ -14,59 +18,70 @@ type ball struct {
 	Radius   float32
 }
 
-func (b *ball) UpdatePosition() {
-	b.Position.X += b.Speed.X
-	b.Position.Y += b.Speed.Y
-
-	// x bounds checking
-	var (
-		xMin                   float32 = b.Radius
-		xMax                   float32 = float32(width) - b.Radius
-		isXPositionOutOfBounds bool    = b.Position.X <= xMin || b.Position.X >= xMax
-	)
-
-	if isXPositionOutOfBounds {
-		b.Speed.X *= float32(-1)
-	}
-
-	// y bounds checking
-	var (
-		yMin                   float32 = b.Radius
-		yMax                   float32 = float32(height) - b.Radius
-		isYPositionOutOfBounds bool    = b.Position.Y <= yMin || b.Position.Y >= yMax
-	)
-
-	if isYPositionOutOfBounds {
-		b.Speed.Y *= float32(-1)
-	}
-}
-
 func main() {
 	rl.InitWindow(width, height, title)
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
 
-	ball := ball{
-		Position: rl.Vector2{
-			X: float32(width) / float32(2),
-			Y: float32(height) / float32(2),
-		},
-		Speed: rl.Vector2{
-			X: 5.0,
-			Y: 2.5,
-		},
-		Radius: float32(20),
-	}
+	// *** Init ***
+	balls := NewRandomBallSlice(100)
 
 	for !rl.WindowShouldClose() {
-		// update
-		ball.UpdatePosition()
+		// *** Update **
+		for i := range balls {
+			balls[i].UpdatePosition()
+		}
 
-		// draw
+		// *** Draw ***
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
-		rl.DrawCircleV(ball.Position, ball.Radius, rl.Blue)
+
+		for i := range balls {
+			balls[i].Draw()
+		}
+
 		rl.EndDrawing()
 	}
+}
+
+// Generate n random balls
+func NewRandomBallSlice(size int) []ball {
+	balls := make([]ball, size)
+	for i := 0; i < size; i++ {
+		balls[i] = ball{
+			Position: rl.Vector2{
+				X: rand.Float32() * float32(rl.GetScreenWidth()),
+				Y: rand.Float32() * float32(rl.GetScreenHeight()),
+			},
+			Speed: rl.Vector2{
+				X: rand.Float32()*10 - 5, // Random x velocity between -5 and 5
+				Y: rand.Float32()*10 - 5, // Random y velocity between -5 and 5
+			},
+			Radius: rand.Float32()*10 + 10, // Random radius between 10 and 20
+		}
+	}
+
+	return balls
+}
+
+func (b *ball) UpdatePosition() {
+	b.Position.X += b.Speed.X
+	b.Position.Y += b.Speed.Y
+
+	xMin := b.Radius
+	xMax := float32(width) - b.Radius
+	if b.Position.X <= xMin || b.Position.X >= xMax {
+		b.Speed.X *= float32(-1)
+	}
+
+	yMin := b.Radius
+	yMax := float32(height) - b.Radius
+	if b.Position.Y <= yMin || b.Position.Y >= yMax {
+		b.Speed.Y *= float32(-1)
+	}
+}
+
+func (b *ball) Draw() {
+	rl.DrawCircleV(b.Position, b.Radius, rl.Blue)
 }
