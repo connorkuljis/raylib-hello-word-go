@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	width  int32 = 1024
-	height int32 = 768
-	title        = "raylib example - basic window"
+	title  string = "raylib example - basic window"
+	width  int32  = 1024
+	height int32  = 768
+	nBalls int    = 1024
 )
 
 type ball struct {
@@ -24,18 +25,16 @@ func main() {
 
 	rl.SetTargetFPS(60)
 
-	// *** Init ***
-	balls := NewRandomBallSlice(128)
+	balls := NewRandomBallSlice(nBalls)
 
 	for !rl.WindowShouldClose() {
-		// *** Update **
 		for i := range balls {
 			balls[i].UpdatePosition()
 		}
 
-		// *** Draw ***
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
+		rl.DrawFPS(0, 0)
 
 		for i := range balls {
 			balls[i].Draw()
