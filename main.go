@@ -25,7 +25,7 @@ func main() {
 	rl.SetTargetFPS(60)
 
 	// *** Init ***
-	balls := NewRandomBallSlice(100)
+	balls := NewRandomBallSlice(128)
 
 	for !rl.WindowShouldClose() {
 		// *** Update **
@@ -65,6 +65,7 @@ func NewRandomBallSlice(size int) []ball {
 	return balls
 }
 
+// TODO: balls with low speed vectors are getting "stuck" near the boundary, oscillating back and forth without making meaningful progress
 func (b *ball) UpdatePosition() {
 	b.Position.X += b.Speed.X
 	b.Position.Y += b.Speed.Y
